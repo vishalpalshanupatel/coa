@@ -1,0 +1,129 @@
+// C++ code:
+
+#include <iostream>
+#include <vector>
+#include <cstdlib> // for rand() and srand()
+#include <ctime> // for time() and clock()
+#include <chrono> // for high_resolution_clock
+using namespace std;
+using namespace std::chrono;
+void initializeMatrix(vector<vector<int>>& matrix) {
+ // Initialize random seed
+ srand(static_cast<unsigned int>(time(0)));
+ int n = matrix.size();
+ 
+ // Fill the matrix with random integers between 0 and 9
+ for (int i = 0; i < n; ++i) {
+ for (int j = 0; j < n; ++j) {
+ matrix[i][j] = rand() % 10; // Random integer between 0 and 9
+ }
+ }
+}
+void multiplyMatrices(const vector<vector<int>>& matrix1, const vector<vector<int>>& matrix2, 
+vector<vector<int>>& result) {
+ int n = matrix1.size();
+ // Initialize result matrix to zero
+ for (int i = 0; i < n; ++i) {
+ for (int j = 0; j < n; ++j) {
+ result[i][j] = 0;
+ }
+ }
+ // Multiply matrices
+ for (int i = 0; i < n; ++i) {
+ for (int j = 0; j < n; ++j) {
+ for (int k = 0; k < n; ++k) {
+ result[i][j] += matrix1[i][k] * matrix2[k][j];
+ }
+ }
+ }
+}
+int main() {
+ int sizes[] = {64, 128, 256, 512, 1024};
+ const int numSizes = sizeof(sizes) / sizeof(sizes[0]);
+ for (int s = 0; s < numSizes; ++s) {
+ int n = sizes[s];
+ // Create matrices using vectors
+ vector<vector<int>> matrix1(n, vector<int>(n));
+ vector<vector<int>> matrix2(n, vector<int>(n));
+ vector<vector<int>> result(n, vector<int>(n));
+ // Measure total system time (wall-clock time) including initialization and multiplication
+ auto start_sys = high_resolution_clock::now();
+ 
+ // Initialize matrices with random values
+ initializeMatrix(matrix1);
+ initializeMatrix(matrix2);
+ // Perform matrix multiplication
+ multiplyMatrices(matrix1, matrix2, result);
+ 
+ auto end_sys = high_resolution_clock::now();
+ auto duration_sys = duration_cast<milliseconds>(end_sys - start_sys).count();
+ 
+ // Measure total CPU time including initialization and multiplication
+ clock_t start_cpu = clock();
+ 
+ // Initialize matrices with random values
+ initializeMatrix(matrix1);
+ initializeMatrix(matrix2);
+ // Perform matrix multiplication
+ multiplyMatrices(matrix1, matrix2, result);
+ 
+ clock_t end_cpu = clock();
+ double duration_cpu = double(end_cpu - start_cpu) / CLOCKS_PER_SEC * 1000; // Convert to 
+milliseconds
+ // Output elapsed times
+ cout << "For matrix size " << n << "x" << n << ":" << endl;
+ cout << " System time (wall-clock): " << duration_sys << " milliseconds." << endl;
+ cout << " CPU time: " << duration_cpu << " milliseconds." << endl;
+ }
+ return 0;
+}
+
+#Python code:
+
+import numpy as np
+import time
+def initialize_matrix(n):
+ """Initialize an n x n matrix with random integers between 0 and 9."""
+ return np.random.randint(0, 10, size=(n, n))
+def manual_multiply_matrices(matrix1, matrix2):
+ """Manually multiply two n x n matrices using nested loops."""
+ n = matrix1.shape[0]
+ result = np.zeros((n, n), dtype=int)
+ for i in range(n):
+ for j in range(n):
+ for k in range(n):
+ result[i, j] += matrix1[i, k] * matrix2[k, j]
+ return result
+def main():
+ sizes = [64, 128, 256, 512, 1024]
+ for n in sizes:
+ # Measure total wall-clock time (system time) including initialization and multiplication
+ start_sys = time.time()
+ 
+ # Initialize matrices with random values
+ matrix1 = initialize_matrix(n)
+ matrix2 = initialize_matrix(n)
+ 
+ # Perform matrix multiplication
+ result_sys = manual_multiply_matrices(matrix1, matrix2)
+ 
+ end_sys = time.time()
+ duration_sys = (end_sys - start_sys) * 1000 # Convert to milliseconds
+ # Measure total CPU time including initialization and multiplication
+ start_cpu = time.process_time()
+ 
+ # Initialize matrices with random values
+ matrix1 = initialize_matrix(n)
+ matrix2 = initialize_matrix(n)
+ 
+ # Perform matrix multiplication
+ result_cpu = manual_multiply_matrices(matrix1, matrix2)
+ 
+ end_cpu = time.process_time()
+ duration_cpu = (end_cpu - start_cpu) * 1000 # Convert to milliseconds
+ # Output elapsed times
+ print(f"For matrix size {n}x{n}:")
+ print(f" System time (wall-clock): {duration_sys:.2f} milliseconds.")
+ print(f" CPU time: {duration_cpu:.2f} milliseconds.")
+if _name_ == "_main_":
+ main()
